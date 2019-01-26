@@ -1,7 +1,10 @@
 # spring-cloud-contract-consumer
 
+### Running test using stubs from artifactory
+Run ConsumerApplicationTests
+
 ### Running stubs using docker
-```$xslt
+```bash
 export MY_IP=`ifconfig | sed -En 's/127.0.0.1//;s/.*inet (addr:)?(([0-9]*\.){3}[0-9]*).*/\2/p'`
 export STUB_PORT=9000
 export STUBRUNNER_IDS=com.example.spring.cloud.contract:producer:0.0.1.RELEASE:stubs:$STUB_PORT

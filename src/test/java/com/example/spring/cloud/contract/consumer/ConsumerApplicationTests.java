@@ -1,5 +1,6 @@
 package com.example.spring.cloud.contract.consumer;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,26 +14,35 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.web.client.RestTemplate;
 
+import java.io.IOException;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @AutoConfigureStubRunner(ids = {"com.example.spring.cloud.contract:producer:+:stubs:8080"},
-		stubsMode = StubRunnerProperties.StubsMode.REMOTE,
-		repositoryRoot = "http://localhost:8081/artifactory/libs-release-local")
+		stubsMode = StubRunnerProperties.StubsMode.LOCAL)
 public class ConsumerApplicationTests {
 
 	@Autowired
 	private RestTemplate restTemplate;
 
+	@Autowired
+	private ObjectMapper objectMapper;
+
 	@Test
-	public void shouldReturnMyMovie() {
+	public void shouldReturnMyMovie() throws IOException {
 		HttpHeaders httpHeaders = new HttpHeaders();
 		httpHeaders.add("Content-Type", "application/json");
 		ResponseEntity<String> response = restTemplate.exchange("http://localhost:8080/movie/1", HttpMethod.GET,
 				new HttpEntity<>(null, httpHeaders),
 				String.class);
 
-		assertThat(response.getBody()).isEqualTo("{\"year\":\"2019\",\"name\":\"My Movie\",\"genre\":\"Action\",\"id\":\"1\"}");
+		Movie movie = objectMapper.readValue(response.getBody(), Movie.class);
+
+		assertThat(movie.getId()).isEqualTo("1");
+		assertThat(movie.getName()).isEqualTo("My Movie");
+		assertThat(movie.getGenre()).isEqualTo("Action");
+		assertThat(movie.getYear()).isEqualTo("2019");
 	}
 }
